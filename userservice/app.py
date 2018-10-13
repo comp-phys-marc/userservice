@@ -6,7 +6,7 @@ from sqlalchemy import inspect
 
 
 celery = Celery("tasks", backend='rpc://',
-                    broker='amqp://guest:guest@localhost:5672', queue="user")
+                    broker='amqp://guest:guest@35.196.180.90:5672', queue="user")
 
 @celery.task(name="user.tasks.login_user")
 def login(name, password):

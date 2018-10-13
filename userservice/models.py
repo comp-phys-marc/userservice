@@ -48,10 +48,10 @@ class SinglePhase(Base):
     __tablename__ = 'Phase'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    flags = Column(Integer)
-    states = Column(Integer)
+    flags = Column(String(2048))
+    states = Column(String(2048))
     previous_phase_id = Column(Integer)
-    phase = Column(Integer)
+    phase = Column(String(2048))
     calculation_id = Column(Integer, ForeignKey('Calculation.id'))
 
     def __init__(self, previous_phase_id, phase):
