@@ -1,6 +1,45 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from database import Base
 from sqlalchemy.orm import relationship
+
+
+class SinglePhase(Base):
+
+    __tablename__ = 'Phase'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    flags = Column(String(2048))
+    states = Column(String(2048))
+    previous_phase_id = Column(Integer)
+    phase = Column(String(2048))
+    calculation_id = Column(Integer, ForeignKey('Calculation.id'))
+
+    def __init__(self, previous_phase_id, phase, user_id):
+        self.previous_phase_id = previous_phase_id
+        self.phase = phase
+        self.user_id = user_id
+
+    def __repr__(self):
+        return '<SinglePhase %r>' % (self.id)
+
+
+class Calculation(Base):
+
+    __tablename__ = 'Calculation'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    result = Column(String(2048))
+    user_id = Column(Integer, ForeignKey('User.id'))
+    type = Column(String(255))
+    phases = relationship("SinglePhase", primaryjoin=SinglePhase.calculation_id == id)
+
+    def __init__(self, result, user_id, type):
+        self.result = result
+        self.user_id = user_id
+        self.type = type
+
+    def __repr__(self):
+        return '<Calculation %r>' % (self.id)
 
 
 class User(Base):
@@ -24,40 +63,3 @@ class User(Base):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
-    
-class Calculation(Base):
-
-    __tablename__ = 'Calculation'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    result = Column(String(2048))
-    user_id = Column(Integer, ForeignKey('User.id'))
-    type = Column(String(255))
-    phases = relationship("SinglePhase", primaryjoin=SinglePhase.calculation_id == id)
-
-    def __init__(self, result, user_id, type):
-        self.result = result
-        self.user_id = user_id
-        self.type = type
-
-    def __repr__(self):
-        return '<Calculation %r>' % (self.id)
-    
-class SinglePhase(Base):
-
-    __tablename__ = 'Phase'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    flags = Column(String(2048))
-    states = Column(String(2048))
-    previous_phase_id = Column(Integer)
-    phase = Column(String(2048))
-    calculation_id = Column(Integer, ForeignKey('Calculation.id'))
-
-    def __init__(self, previous_phase_id, phase):
-        self.previous_phase_id = previous_phase_id
-        self.phase = phase
-        self.user_id = user_id
-
-    def __repr__(self):
-        return '<SinglePhase %r>' % (self.id)

@@ -12,4 +12,3 @@ vine==1.1.4
 Werkzeug==0.14.1
 psycopg2==2.7.5
 decorator==4.3.0
-pyodbc==4.0.23

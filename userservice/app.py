@@ -6,11 +6,13 @@ from sqlalchemy import inspect
 
 
 celery = Celery("tasks", backend='rpc://',
-                    broker='amqp://guest:guest@35.196.180.90:5672', queue="user")
+                    broker='amqp://SA:tercesdeqmis@35.237.95.206:5672', queue="user")
+
 
 @celery.task(name="user.tasks.login_user")
 def login(name, password):
     return json.dumps(object_as_dict(User.query.filter_by(name=name, password=password).first()))
+
 
 @celery.task(name="user.tasks.list_users")
 def list_users(filter):
@@ -51,6 +53,7 @@ def get_user(id):
 def add_commit(obj):
     db_session.add(obj)
     return db_session.commit(obj)
+
 
 def object_as_dict(obj):
     return {c.key: getattr(obj, c.key)
