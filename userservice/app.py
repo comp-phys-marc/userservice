@@ -25,7 +25,7 @@ def login(name, password):
             "status": 400
         }
 
-    user = User.query.filter_by(name=name, password=password).first()
+    user = User.query.filter_by(name=name).first()
 
     if user is not None:
         password = password.encode('utf-8')
