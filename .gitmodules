@@ -1,0 +1,3 @@
+[submodule "userservice/common"]
+	path = userservice/common
+	url = https://gitlab.com/QuantumEmulator/emulatorcommon.git

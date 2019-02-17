@@ -1,10 +1,10 @@
 import bcrypt
 import json
-from database import Database
 from models import User
-from message_bus import MessageBus
 from settings import Settings
-from utilities import Utils
+from common.message_bus import MessageBus
+from common.utilities import Utils
+from common.database import Database
 
 settings = Settings()
 utils = Utils()
