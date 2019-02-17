@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 class SinglePhase(Database.Base):
 
-    __tablename__ = 'Phase'
+    __tablename__ = 'SinglePhase'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     flags = Column(String(2048))

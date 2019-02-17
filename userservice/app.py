@@ -19,6 +19,12 @@ db_session = database.session
 @conn.task(name="user.tasks.login_user")
 def login(name, password):
 
+    if not name or not password:
+        return {
+            "message": "Invalid request.",
+            "status": 400
+        }
+
     user = User.query.filter_by(name=name, password=password).first()
 
     if user is not None:
@@ -72,8 +78,18 @@ def list_users(filter):
 
 @conn.task(name="user.tasks.create_user")
 def create_user(data):
+
+    if 'password' not in data:
+        return {
+            "message": "User password not provided.",
+            "status": 400
+        }
+
+    data['password'] = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
     new_user = User(**data)
     db_session.add(new_user)
+
     return try_commit()
 
 
