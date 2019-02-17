@@ -36,7 +36,7 @@ def login(name, password):
         if authenticated:
             return {
                 "message": "Login successful.",
-                "data": utils.object_as_dict(user),
+                "data": json.dumps(utils.object_as_dict(user)),
                 "status": 200
             }
 
