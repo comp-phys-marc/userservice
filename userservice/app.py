@@ -1,60 +1,129 @@
-from database import db_session
-from models import User
-from celery import Celery
+import bcrypt
 import json
-from sqlalchemy import inspect
+from database import Database
+from models import User
+from message_bus import MessageBus
+from settings import Settings
+from utilities import Utils
+
+settings = Settings()
+utils = Utils()
+
+bus = MessageBus(settings)
+conn = bus.connection
+
+database = Database(settings)
+db_session = database.session
 
 
-celery = Celery("tasks", backend='rpc://',
-                    broker='amqp://SA:tercesdeqmis@35.237.95.206:5672', queue="user")
-
-
-@celery.task(name="user.tasks.login_user")
+@conn.task(name="user.tasks.login_user")
 def login(name, password):
-    return json.dumps(object_as_dict(User.query.filter_by(name=name, password=password).first()))
+
+    user = User.query.filter_by(name=name, password=password).first()
+
+    if user is not None:
+        password = password.encode('utf-8')
+        user_password = user.password.encode('utf-8')
+
+        authenticated = bcrypt.checkpw(password, user_password)
+
+        if authenticated:
+            return {
+                "message": "Login successful.",
+                "data": utils.object_as_dict(user),
+                "status": 200
+            }
+
+        else:
+            return {
+                "message": "Invalid password.",
+                "status": 401
+            }
+    else:
+        return {
+            "message": f'User with name {name} not found.',
+            "status": 404
+        }
 
 
-@celery.task(name="user.tasks.list_users")
+@conn.task(name="user.tasks.list_users")
 def list_users(filter):
     users_array = []
     if filter is None:
         users = User.query.all()
         for user in users:
             users_array.extend(dict(user))
-        return json.dumps(users_array)
     else:
         users = User.query.filter_by(**filter)
         for user in users:
-            users_array.append(object_as_dict(user))
-        return json.dumps(users_array)
+            users_array.append(utils.object_as_dict(user))
+    if len(users_array) > 0:
+        return {
+            "message": "Users found.",
+            "data": json.dumps(users_array),
+            "status": 200
+        }
+    else:
+        return {
+            "message": "No matching users found.",
+            "status": 404
+        }
 
 
-@celery.task(name="user.tasks.create_users")
-def create_users(data):
-    for user_data in data.dataList:
-        new_user = User(**user_data)
-        return add_commit(new_user)
+@conn.task(name="user.tasks.create_user")
+def create_user(data):
+    new_user = User(**data)
+    db_session.add(new_user)
+    return try_commit()
 
 
-@celery.task(name="user.tasks.update_users")
-def update_users(data):
-    for user_data in data.dataList:
-        old_user = User.query.filter_by(id=user_data.id).first()
+@conn.task(name="user.tasks.update_user")
+def update_user(data):
+    if data.id is not None:
+        old_user = User.query.filter_by(id=data.id).first()
         if old_user:
-            updated_user = old_user.update(user_data)
-            return add_commit(updated_user)
+            updated_user = old_user.update(data)
+            db_session.add(updated_user)
+            return try_commit()
+        else:
+            return {
+                "message": "User not found.",
+                "status": 404
+            }
+    else:
+        return {
+            "message": "User id not provided.",
+            "status": 400
+        }
 
 
-@celery.task(name="user.tasks.get_user")
+@conn.task(name="user.tasks.get_user")
 def get_user(id):
-    return User.query.filter_by(id=id).first()
+    user = User.query.filter_by(id=id).first()
+
+    if user is None:
+        return {
+            "message": f'User with id {id} not found.',
+            "status": 404
+        }
+    else:
+        return {
+            "message": "User found.",
+            "data": json.dumps(user),
+            "status": 200
+        }
 
 
-def add_commit(obj):
-    db_session.add(obj)
-    return db_session.commit(obj)
-
-
-def object_as_dict(obj):
-    return {c.key: getattr(obj, c.key)
-            for c in inspect(obj).mapper.column_attrs}
+def try_commit():
+    try:
+        db_session.commit()
+        return {
+            "message": "Operation successful.",
+            "status": 200
+        }
+    except Exception as e:
+        error_message = str(e)
+        return {
+            "message": f'An error occurred: {error_message}',
+            "status": 500
+        }
