@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from common.database import Database
+from emulatorcommon.database import Database
 from sqlalchemy.orm import relationship
 
 
