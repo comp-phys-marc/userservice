@@ -66,7 +66,7 @@ def list_users(filter):
     if len(users_array) > 0:
         return {
             "message": "Users found.",
-            "data": json.dumps(users_array),
+            "data": json.dumps(utils.object_as_dict(users_array)),
             "status": 200
         }
     else:
@@ -125,7 +125,7 @@ def get_user(id):
     else:
         return {
             "message": "User found.",
-            "data": json.dumps(user),
+            "data": json.dumps(utils.object_as_dict(user)),
             "status": 200
         }
 
