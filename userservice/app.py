@@ -1,5 +1,4 @@
 import bcrypt
-import json
 from models import User
 from settings import Settings
 from emulatorcommon.message_bus import MessageBus
@@ -36,7 +35,7 @@ def login(name, password):
         if authenticated:
             return {
                 "message": "Login successful.",
-                "data": json.dumps(utils.object_as_dict(user)),
+                "data": utils.object_as_dict(user),
                 "status": 200
             }
 
@@ -66,7 +65,7 @@ def list_users(filter):
     if len(users_array) > 0:
         return {
             "message": "Users found.",
-            "data": json.dumps(utils.object_as_dict(users_array)),
+            "data": utils.object_as_dict(users_array),
             "status": 200
         }
     else:
@@ -125,7 +124,7 @@ def get_user(id):
     else:
         return {
             "message": "User found.",
-            "data": json.dumps(utils.object_as_dict(user)),
+            "data": utils.object_as_dict(user),
             "status": 200
         }
 
