@@ -5,7 +5,7 @@ click==6.7
 itsdangerous==0.24
 Jinja2==2.10
 kombu==4.2.1
-MarkupSafe==1.0
+MarkupSafe>=1.0
 pytz==2018.5
 SQLAlchemy==1.2.10
 vine==1.1.4
