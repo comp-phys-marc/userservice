@@ -1,3 +1,3 @@
 [submodule "userservice/emulatorcommon"]
 	path = userservice/emulatorcommon
-	url = https://github.com/comp-phys-marc/emulatorcommon
+	url = https://github.com/comp-phys-marc/emulatorcommon.git
